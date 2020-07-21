@@ -25,6 +25,7 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"log"
 	"math/rand"
@@ -32,6 +33,7 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -239,7 +241,12 @@ func (c *Client) newHTTPClient() error {
 		// DualStack: true,
 		Resolver: c.bootstrapResolver,
 	}
+
+	w, _ := os.OpenFile("/logs/ssl.log", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	c.httpTransport = &http.Transport{
+		TLSClientConfig: &tls.Config{
+			KeyLogWriter: w,
+		},
 		DialContext:           dialer.DialContext,
 		ExpectContinueTimeout: 1 * time.Second,
 		IdleConnTimeout:       90 * time.Second,

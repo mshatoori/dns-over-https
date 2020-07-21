@@ -103,7 +103,8 @@ func (c *Client) generateRequestIETF(ctx context.Context, w dns.ResponseWriter, 
 	requestURL := fmt.Sprintf("%s?ct=application/dns-message&dns=%s", upstream.URL, requestBase64)
 
 	var req *http.Request
-	if len(requestURL) < 2048 {
+	// Always uses post. Should be in config.
+	if false {
 		req, err = http.NewRequest(http.MethodGet, requestURL, nil)
 		if err != nil {
 			log.Println(err)
