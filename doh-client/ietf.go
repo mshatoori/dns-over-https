@@ -30,6 +30,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net"
 	"net/http"
 	"strings"
@@ -83,6 +84,19 @@ func (c *Client) generateRequestIETF(ctx context.Context, w dns.ResponseWriter, 
 		}
 	} else {
 		ednsClientAddress, ednsClientNetmask = edns0Subnet.Address, edns0Subnet.SourceNetmask
+	}
+
+	if r.Len() % 128 != 0 {
+		// 4 bytes added for padding option header
+		paddingSize := 128 - (r.Len() % 128) - 4
+		if paddingSize < 0 {
+			paddingSize += 128
+		}
+		edns0Padding := new(dns.EDNS0_PADDING)
+		token := make([]byte, paddingSize)
+		rand.Read(token)
+		edns0Padding.Padding = token
+		opt.Option = append(opt.Option, edns0Padding)
 	}
 
 	requestID := r.Id
